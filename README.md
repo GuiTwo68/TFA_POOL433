@@ -40,5 +40,5 @@ Senders are usually repeats the message 3-6 times.
 
 Inspiration
 
-This is an adaptation of Denxhum thanks to him.
+This is an adaptation of Denxhun thanks to him.
 https://github.com/denxhun/TFA433

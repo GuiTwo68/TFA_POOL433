@@ -1,6 +1,6 @@
 #include <TFA_POOL433.h>
 
-TFA433 tfa = TFA_POOL433(); 
+TFA_POOL433 tfa = TFA_POOL433(); 
 
 void setup() {
   Serial.begin(57600);

@@ -55,7 +55,7 @@ class TFA_POOL433{
 		static void _handler();
 		static bool _isRepeat();
 		int _binToDecRev(volatile byte *binary, int s, int e);
-		int _binToDec(volatile byte *binary, int s, int e);
+		int _binToSignedRev(volatile byte *binary, int s, int e);
 };
 
 #endif

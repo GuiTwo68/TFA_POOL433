@@ -8,9 +8,10 @@
 
 #define REPEAT_DELAY 3000 //ms
 
-#define dbg(s) Serial.println(s)
-#define dbgs(s) Serial.print(s)
-//define dbg(s)
+//#define dbg(s) Serial.println(s)
+//#define dbgs(s) Serial.print(s)
+#define dbg(s)
+#define dbgs(s)
 
 const int TFA_POOL433::_BUFF_SIZE = 36;
 
@@ -78,10 +79,13 @@ void TFA_POOL433::_handler() {
 				{
 					if (_buffEnd == _BUFF_SIZE )
 					{
-						//dbg("STOP");// 
-						_avail = true;
+						//dbg("STOP");//
+						if (_isRepeat()){	
+							_avail = true;
+							
+							//dbg("S buffEnd:" + String(_buffEnd));
+						}
 						_STARTb = 0;
-						//dbg("S buffEnd:" + String(_buffEnd));
 					}
 					else if (_buffEnd > _BUFF_SIZE) // useful ?
 						{
@@ -134,33 +138,34 @@ void TFA_POOL433::getData(byte &id, byte &channel, int &temperature, bool &batte
 	
 
 
-
+/* PRINT BUFFER
 	for(int i=0;i<_buffEnd;i++) {
 		dbgs(_buff[i]);
 	}
-	dbgs("\n");
+	//dbgs("\n");
+*/
+
 	id = _binToDecRev(_buff, 0, 3);
-	channel = _binToDecRev(_buff, 14, 15)+1;
-	temp1 = _binToDecRev(_buff, 16, 27);
+		//if(id == 9) {
 
+			//id = _binToDecRev(_buff, 4, 11);		// 12 - 0, 13 - Tx Button
+			channel = _binToDecRev(_buff, 14, 15) + 1;
 
+			temp1 = _binToSignedRev(_buff, 16, 27);
+			temperature = temperature = temp1*10;//(double)(temp1*10);
 
+			//humi1 = _binToDecRev(binary, 28, 35); // NOT USED 
+			//humidity = (double)humi1;
 
-//fixed id: 0 till 3
-//rolling code: 4 till 13
+			if(_binToDecRev(_buff, 36, 36) == 1) {
+				battery = 0;
+			} else {
+				battery = 1;
+			}
+	//	} else {
+	//		return;
+	//	} 
 
-//Channel: 14 till 15
-//Temperature: 16 till 27
-//Battery
-
-  
-
-	// Convert from Temperature
-	temperature = temp1*10;//(((((temp1) * 100) - 14800 - 3200) * 5) / 9);
-
-
-
-	battery = 0;//_binToDecRev(_buff, 29, 30) != 1;
 	_STARTb = 0;
 	_avail = false;
 	_buffEnd = 0;
@@ -183,11 +188,11 @@ int TFA_POOL433::_binToDecRev(volatile byte *binary, int s, int e) {
 	return result;
 }
 
-int TFA_POOL433::_binToDec(volatile byte *binary, int s, int e) {
-	unsigned int mask = 1;
-	int result = 0;
-	for(; s<=e; mask <<= 1)
-	if(binary[s++] != 0)
-		result |= mask;
+int TFA_POOL433::_binToSignedRev(volatile byte *binary, int s, int e) { //  0<=s<=e, binary[s(msb) .. e(lsb)]
+	int result = _binToDecRev(binary, s, e);
+	if (binary[s]) {
+		result -= 1<<(e-s+1);
+	}
 	return result;
 }
+
